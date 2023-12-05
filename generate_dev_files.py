@@ -47,10 +47,35 @@ while vid_capture.isOpened() and count < N_FRAMES:
     # and the second is frame
     is_good, frame = vid_capture.read()
     if is_good:
+        # STABILIZATION ALGO
+
         # crop
+        # this should be something configurable
         frame = frame[0:800, 400:1400]
 
-        cv2.imshow("frame", frame)
+        # convert LAB and pick luminance channel
+        luminance = cv2.cvtColor(frame, cv2.COLOR_BGR2Lab)[:, :, 0]
+
+        # fast blur - goal is to get rid of high frequency noise
+        luminance = cv2.GaussianBlur(luminance, (5, 5), 0)
+
+        # binarize luminance to get object mask
+        _, luminance = cv2.threshold(
+            luminance, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
+        )
+
+        # calculate moments of binary image
+        M = cv2.moments(luminance)
+
+        # calculate x,y coordinate of center
+        cX = int(M["m10"] / M["m00"])
+        cY = int(M["m01"] / M["m00"])
+
+        cv2.rectangle(luminance, (cX - 5, cY - 5), (cX + 5, cY + 5), (0, 0, 0), -1)
+
+        # put text and highlight the center
+
+        cv2.imshow("frame", luminance)
 
         # write the frame to the output file
         output.write(frame)
