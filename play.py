@@ -1,17 +1,18 @@
+"""Render a video file with opencv"""
 import cv2
+import argparse
 
-VIDEO_FILES = ["data/2023-12-01-0159_6-Uranus.AVI", "2023-11-30-0112_6-Jupiter.AVI"]
-VIDEO_LABELS = ["uranus", "jupiter"]
-N_FRAMES = 500
-OUTPUT_FPS = 30
+VIDEO_FILE = "data/2023-12-01-0159_6-Uranus.AVI"
+N_FRAMES = 1000
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "video_file", type=str, default=VIDEO_FILE, help="Path to video file"
+)
+args = parser.parse_args()
 
 # Create a video capture object, in this case we are reading the video from a file
-vid_capture = cv2.VideoCapture(VIDEO_FILES[0])
-
-codecs = {
-    "avi": cv2.VideoWriter_fourcc("M", "J", "P", "G"),
-    "mp4": cv2.VideoWriter_fourcc(*"mp4v"),
-}
+vid_capture = cv2.VideoCapture(args.video_file)
 
 try:
     # if vid_capture.isOpened():
@@ -31,32 +32,21 @@ finally:
     pass
 
 
-# Initialize video writer object
-output = cv2.VideoWriter(
-    VIDEO_LABELS[0] + ".mp4",
-    codecs["mp4"],
-    OUTPUT_FPS,
-    (1000, 800),
-)
-
 count = 0
 while vid_capture.isOpened() and count < N_FRAMES:
-    # print(count)
-
     # vid_capture.read() methods returns a tuple, first element is a bool
     # and the second is frame
     is_good, frame = vid_capture.read()
     if is_good:
         # crop
-        frame = frame[0:800, 400:1400]
+        frame = frame[0:900, 400:]
 
-        cv2.imshow("frame", frame)
+        cv2.imshow("Frame", frame)
+        # 20 is in milliseconds, try to increase the value, say 50 and observe
+        key = cv2.waitKey(20)
 
-        # write the frame to the output file
-        output.write(frame)
-        if cv2.waitKey(20) == ord("q"):
+        if key == ord("q"):
             break
-
     else:
         break
 
@@ -65,5 +55,4 @@ while vid_capture.isOpened() and count < N_FRAMES:
 
 # Release the video capture object
 vid_capture.release()
-output.release()
 cv2.destroyAllWindows()
