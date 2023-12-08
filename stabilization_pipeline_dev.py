@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from typing import Tuple
+from src.cv2_colors import RED, GREEN
 
 # VIDEO_FILES = [
 #     "data/2023-12-01-0159_6-Uranus.AVI",
@@ -14,23 +15,17 @@ FILE = "data/jupiter1.mp4"
 N_FRAMES = 500
 CROP_HALF_SIDE = 300
 MARKER_HALF_SIDE = 5
-# only for debugging steps of an algorithm
-DEBUG = True
 CODECS = {
     "avi": cv2.VideoWriter_fourcc("M", "J", "P", "G"),
     "mp4": cv2.VideoWriter_fourcc(*"mp4v"),
 }
-RED = (0, 0, 255)
-GREEN = (0, 150, 0)
 
 # initialize video capture objects
 vid_capture = cv2.VideoCapture(FILE)
-if DEBUG:
-    fps = vid_capture.get(5)
-    print(f"Frame Rate: {fps} FPS")
-
-    frame_count = vid_capture.get(7)
-    print(f"Frame Count : {frame_count}")
+fps = vid_capture.get(5)
+print(f"Frame Rate: {fps} FPS")
+frame_count = vid_capture.get(7)
+print(f"Frame Count : {frame_count}")
 
 
 def imshow_named(img: np.ndarray, name: str, x: int = 0, y: int = 0):

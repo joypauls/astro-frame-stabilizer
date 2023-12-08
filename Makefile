@@ -9,7 +9,7 @@ test-files:
 	python -m generate_test_files
 
 play:
-	python -m player
+	python -m player --file data/jupiter1.mp4 --n 10
 
 
 
