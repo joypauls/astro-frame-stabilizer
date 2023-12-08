@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from typing import Tuple
 
 # VIDEO_FILES = [
 #     "data/2023-12-01-0159_6-Uranus.AVI",
@@ -8,14 +9,19 @@ import numpy as np
 # VIDEO_LABELS = ["uranus", "jupiter"]
 
 # FILE = "data/uranus.mp4"
-FILE = "data/jupiter.mp4"
+FILE = "data/jupiter1.mp4"
+# FILE = "data/jupiter2.mp4"
 N_FRAMES = 500
+CROP_HALF_SIDE = 300
+MARKER_HALF_SIDE = 5
 # only for debugging steps of an algorithm
 DEBUG = True
 CODECS = {
     "avi": cv2.VideoWriter_fourcc("M", "J", "P", "G"),
     "mp4": cv2.VideoWriter_fourcc(*"mp4v"),
 }
+RED = (0, 0, 255)
+GREEN = (0, 150, 0)
 
 # initialize video capture objects
 vid_capture = cv2.VideoCapture(FILE)
@@ -37,16 +43,16 @@ def imshow_named(img: np.ndarray, name: str, x: int = 0, y: int = 0):
 def build_algorithm_visual(
     binary_frame: np.ndarray,
     centroid: tuple[int, int],
-    r1: int = 4,
-    r2: int = 100,
-):
+    r1: int = MARKER_HALF_SIDE,
+    r2: int = CROP_HALF_SIDE,
+) -> cv2.UMat:
     visual = cv2.cvtColor(binary_frame, cv2.COLOR_GRAY2BGR)
     # draw the marker for centroid
     cv2.rectangle(
         visual,
         (centroid[0] - r1, centroid[1] - r1),
         (centroid[0] + r1, centroid[1] + r1),
-        (0, 255, 0),
+        RED,
         -1,
     )
     # draw the cropped padded boundary around object
@@ -54,11 +60,63 @@ def build_algorithm_visual(
         visual,
         (centroid[0] - r2, centroid[1] - r2),
         (centroid[0] + r2, centroid[1] + r2),
-        (0, 255, 0),
+        RED,
         2,
     )
     # resize to fit on laptop screen
     return cv2.resize(visual, (int(visual.shape[1] / 2), int(visual.shape[0] / 2)))
+
+
+def adjust_output_frame(
+    frame: np.ndarray, centroid: Tuple[int, int], r: int = CROP_HALF_SIDE
+) -> cv2.UMat:
+    # corners of the cropping square, they can be negative which is handled below
+    crop_y0 = centroid[1] - r
+    crop_y1 = centroid[1] + r
+    crop_x0 = centroid[0] - r
+    crop_x1 = centroid[0] + r
+
+    # handle padding from crop that goes out of bounds
+    if any(
+        [
+            crop_y0 < 0,
+            crop_y1 > frame.shape[0],
+            crop_x0 < 0,
+            crop_x1 > frame.shape[1],
+        ]
+    ):
+        # padding for image if any crop is out of bounds
+        top_pad = 0
+        bottom_pad = 0
+        left_pad = 0
+        right_pad = 0
+        if crop_y0 < 0:
+            top_pad = abs(crop_y0)
+            crop_y0 = 0
+        if crop_y1 > frame.shape[0]:
+            bottom_pad = crop_y1 - frame.shape[0]
+            crop_y1 = frame.shape[0]
+        if crop_x0 < 0:
+            left_pad = abs(crop_x0)
+            crop_x0 = 0
+        if crop_x1 > frame.shape[1]:
+            right_pad = crop_x1 - frame.shape[1]
+            crop_x1 = frame.shape[1]
+
+        cropped_frame = frame[crop_y0:crop_y1, crop_x0:crop_x1]
+        cropped_frame = cv2.copyMakeBorder(
+            cropped_frame,
+            top_pad,
+            bottom_pad,
+            left_pad,
+            right_pad,
+            cv2.BORDER_CONSTANT,
+            value=GREEN,
+        )
+    else:
+        cropped_frame = frame[crop_y0:crop_y1, crop_x0:crop_x1]
+
+    return cropped_frame
 
 
 count = 0
@@ -91,11 +149,9 @@ while vid_capture.isOpened() and count < N_FRAMES:
 
         # calculate x,y coordinate of center
         centroid = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-        pad = 300
-        cropped_frame = frame[
-            centroid[1] - pad : centroid[1] + pad,
-            centroid[0] - pad : centroid[0] + pad,
-        ]
+
+        # crop and expand frame where needed
+        cropped_frame = adjust_output_frame(frame, centroid)
 
         # if DEBUG:
         # print(frame.shape)
@@ -105,7 +161,7 @@ while vid_capture.isOpened() and count < N_FRAMES:
         # put anything here to visualize while processing
         # for instance the binary thresholded image
         imshow_named(
-            build_algorithm_visual(luminance, centroid, 4, pad),
+            build_algorithm_visual(luminance, centroid),
             "Algorithm",
             x=cropped_frame.shape[1],
             y=0,

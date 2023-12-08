@@ -1,2 +1,22 @@
-build-dev:
+# set up development environment
+# these assume you have created a virtual environment already and activated it
+# ex.) python3 -m venv venv && source venv/bin/activate
+
+dev:
 	python -m pip install -r requirements.txt
+
+test-files:
+	python -m generate_test_files
+
+play:
+	python -m player
+
+
+
+# Run development pipelines for various components of the workflow
+
+stabilizer:
+	python -m stabilization_pipeline_dev
+
+quality:
+	python -m quality_pipeline_dev
