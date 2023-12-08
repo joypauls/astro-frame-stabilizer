@@ -2,7 +2,7 @@
 import cv2
 import argparse
 
-VIDEO_FILE = "data/2023-12-01-0159_6-Uranus.AVI"
+VIDEO_FILE = "data/jupiter.mp4"
 N_FRAMES = 1000
 
 parser = argparse.ArgumentParser()
@@ -11,25 +11,16 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-# Create a video capture object, in this case we are reading the video from a file
-vid_capture = cv2.VideoCapture(args.video_file)
 
 try:
-    # if vid_capture.isOpened():
+    vid_capture = cv2.VideoCapture(args.video_file)
     print("Error opening the video file")
-    # Read fps and frame count
-    # else:
-    # Get frame rate information
-    # You can replace 5 with CAP_PROP_FPS as well, they are enumerations
     fps = vid_capture.get(5)
-    print("Frames per second : ", fps, "FPS")
-
-    # Get frame count
-    # You can replace 7 with CAP_PROP_FRAME_COUNT as well, they are enumerations
+    print(fps, "FPS")
     frame_count = vid_capture.get(7)
-    print("Frame count : ", frame_count)
-finally:
-    pass
+    print("Frames: ", frame_count)
+except Exception as e:
+    print(e)
 
 
 count = 0
@@ -38,8 +29,8 @@ while vid_capture.isOpened() and count < N_FRAMES:
     # and the second is frame
     is_good, frame = vid_capture.read()
     if is_good:
-        # crop
-        frame = frame[0:900, 400:]
+        # # crop
+        # frame = frame[0:900, 400:]
 
         cv2.imshow("Frame", frame)
         # 20 is in milliseconds, try to increase the value, say 50 and observe

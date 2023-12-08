@@ -1,37 +1,35 @@
+"""Goal is to generate some small/short files from longer real data."""
 import cv2
 
 VIDEO_FILES = [
     "data/2023-12-01-0159_6-Uranus.AVI",
     "data/2023-11-30-0112_6-Jupiter.AVI",
+    "data/2023-12-08-0151_9-Jupiter.AVI",
 ]
-VIDEO_LABELS = ["uranus", "jupiter"]
+VIDEO_LABELS = ["uranus", "jupiter1", "jupiter2"]
+OFFSETS = [0, 0, 0]
 N_FRAMES = 500
 OUTPUT_FPS = 30
-
-
-codecs = {
+CODECS = {
     "avi": cv2.VideoWriter_fourcc("M", "J", "P", "G"),
     "mp4": cv2.VideoWriter_fourcc(*"mp4v"),
 }
 
-
 for i, path in enumerate(VIDEO_FILES):
-    vid_capture = cv2.VideoCapture(path)
-
     try:
-        # if vid_capture.isOpened():
-        print("Error opening the video file")
+        vid_capture = cv2.VideoCapture(path)
         fps = vid_capture.get(5)
         print("Frames per second : ", fps, "FPS")
         frame_count = vid_capture.get(7)
         print("Frame count : ", frame_count)
-    finally:
-        pass
+    except Exception as e:
+        print(f"Error reading {path}")
+        print(e)
 
     # Initialize video writer object
     output = cv2.VideoWriter(
         "data/" + VIDEO_LABELS[i] + ".mp4",
-        codecs["mp4"],
+        CODECS["mp4"],
         OUTPUT_FPS,
         (1000, 800),
     )
@@ -42,7 +40,9 @@ for i, path in enumerate(VIDEO_FILES):
         if is_good:
             # crop
             # this should be something configurable
-            frame = frame[0:800, 400:1400]
+            frame = frame[
+                OFFSETS[i] : 800 + OFFSETS[i], 400 + OFFSETS[i] : 1400 + OFFSETS[i]
+            ]
             # comment out if you're not debugging
             cv2.imshow(f"processing test file: {VIDEO_LABELS[i]}", frame)
             # write the frame to the output file
