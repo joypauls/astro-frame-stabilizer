@@ -1,7 +1,7 @@
 import argparse
 
 
-def parse() -> argparse.Namespace:
+def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("test", type=str, default="", help="Replace this")
     args = parser.parse_args()
@@ -10,9 +10,10 @@ def parse() -> argparse.Namespace:
 
 def main():
     # parse command line arguments
-    args = parse()
+    args = _parse()
 
     # logic
+    print(args.test)
 
 
 if __name__ == "__main__":

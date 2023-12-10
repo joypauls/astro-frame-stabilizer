@@ -3,7 +3,7 @@
 # ex.) python3 -m venv venv && source venv/bin/activate
 
 dev:
-	python -m pip install -r requirements.txt
+	python3 -m pip install -r requirements.txt
 
 test-files:
 	python -m generate_test_files

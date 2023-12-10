@@ -1,5 +1,7 @@
 # frame-stabilizer
 
+# Algorithm
+
 # Dev
 
 These aren't guaranteed to work in another environment, need to make more generalizable at some point
@@ -12,3 +14,6 @@ These aren't guaranteed to work in another environment, need to make more genera
 # Tests
 
 - Should include an E2E test that can be validated visually (and possibly quantitatively)
+
+
+# Sources

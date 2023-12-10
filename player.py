@@ -103,7 +103,7 @@ class Player:
         while self.capture.isOpened() and count < self.n:
             is_good, frame = self.capture.read()
             if is_good:
-                self.filter(frame) if self.filter else None
+                frame = self.filter(frame) if self.filter else frame
                 cv2.imshow(title, frame)
                 key = cv2.waitKey(20)
                 if key == ord("q"):
