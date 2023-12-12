@@ -1,4 +1,9 @@
-"""Goal is to generate some small/short files from longer real data."""
+"""
+Goal is to generate some small/short files from longer real data
+
+Input: Raw (some cropped) video files
+
+"""
 import cv2
 
 VIDEO_FILES = [
@@ -16,6 +21,9 @@ CODECS = {
 }
 
 for i, path in enumerate(VIDEO_FILES):
+    # flag for whether we should also export a downsampled video
+    downsample = "jupiter" in VIDEO_LABELS[i]
+    # open video
     try:
         vid_capture = cv2.VideoCapture(path)
         fps = vid_capture.get(5)
@@ -26,13 +34,21 @@ for i, path in enumerate(VIDEO_FILES):
         print(f"Error reading {path}")
         print(e)
 
-    # Initialize video writer object
+    # initialize video writer object
     output = cv2.VideoWriter(
         "data/" + VIDEO_LABELS[i] + ".mp4",
         CODECS["mp4"],
         OUTPUT_FPS,
         (1000, 800),
     )
+
+    if downsample:
+        output_downsample = cv2.VideoWriter(
+            "data/" + VIDEO_LABELS[i] + "_downsampled.mp4",
+            CODECS["mp4"],
+            OUTPUT_FPS,
+            (500, 400),
+        )
 
     count = 0
     while vid_capture.isOpened() and count < N_FRAMES:
@@ -47,6 +63,9 @@ for i, path in enumerate(VIDEO_FILES):
             cv2.imshow(f"processing test file: {VIDEO_LABELS[i]}", frame)
             # write the frame to the output file
             output.write(frame)
+            if downsample:
+                blurred = cv2.GaussianBlur(frame, (3, 3), 0)
+                output_downsample.write(cv2.resize(frame, (500, 400)))
             if cv2.waitKey(20) == ord("q"):
                 break
         else:
@@ -56,6 +75,7 @@ for i, path in enumerate(VIDEO_FILES):
     vid_capture.release()
     # Release the video capture object
     output.release()
+    output_downsample.release() if downsample else None
 
 
 cv2.destroyAllWindows()

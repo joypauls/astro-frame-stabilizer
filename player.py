@@ -9,8 +9,13 @@ import numpy as np
 import argparse
 from typing import Optional, Callable
 
-TEST_VIDEO_FILE = "data/jupiter1.mp4"
 N_FRAMES = 500
+DEFAULT_FPS = 30
+
+CODECS = {
+    "avi": cv2.VideoWriter_fourcc("M", "J", "P", "G"),
+    "mp4": cv2.VideoWriter_fourcc(*"mp4v"),
+}
 
 
 def _parse() -> argparse.Namespace:
@@ -28,7 +33,7 @@ def _parse() -> argparse.Namespace:
     parser.add_argument(
         "--n",
         type=int,
-        default=None,
+        default=np.inf,
         required=False,
         help="Only first n frames",
     )
@@ -70,8 +75,9 @@ def _parse() -> argparse.Namespace:
 
 class Player:
     """
-    Plays a video file
+    Plays a video file filtered by a function, optionally saves result
 
+    Filtering should NOT change dimensions of the frame (but might still play)
     """
 
     def __init__(
@@ -79,35 +85,73 @@ class Player:
         file: Optional[str] = None,
         dir: Optional[str] = None,
         filter: Optional[Callable] = None,
+        filter_debug: Optional[Callable] = None,
         n: float = np.inf,
     ):
+        # check
+        if not file:
+            raise Exception("No file selected or passed in as an arg")
         # from args
         self.file = file
         self.dir = dir
         self.n = n
         self.filter = filter
+        self.debugging = True if filter_debug else False
+        self.filter_debug = filter_debug if filter_debug else None
 
-        # derived
-        self.capture = None
-        self.fps = None
-        if file:
-            self.capture = cv2.VideoCapture(file)
-            self.fps = self.capture.get(5)
+        # main video
+        self.capture = cv2.VideoCapture(file)
+        self.capture_metadata = self._get_capture_metadata(self.capture)
+        self.output = None
 
-    def play(self):
+    def _get_capture_metadata(self, capture: cv2.VideoCapture):
+        return {
+            "fps": capture.get(5),
+            "width": capture.get(cv2.CAP_PROP_FRAME_WIDTH),
+            "height": capture.get(cv2.CAP_PROP_FRAME_HEIGHT),
+        }
+
+    def _imshow_named(self, img: np.ndarray, name: str, x: int = 0, y: int = 0):
+        # create a window and move
+        cv2.namedWindow(name)
+        cv2.moveWindow(name, x, y)
+        cv2.imshow(name, img)
+
+    def play(self, save_file: Optional[str] = None):
         """actual render loop"""
         if not self.file:
             raise Exception("No file selected or passed in as an arg")
+        if save_file:
+            self.output = cv2.VideoWriter(
+                save_file,
+                CODECS["mp4"],
+                self.fps if self.fps else DEFAULT_FPS,
+                (self.width, self.height),
+            )
         title = f"Playing {self.file}" if self.file else "player.py"
         count = 0
         while self.capture.isOpened() and count < self.n:
             is_good, frame = self.capture.read()
             if is_good:
+                # show main window
                 frame = self.filter(frame) if self.filter else frame
                 cv2.imshow(title, frame)
+                self.output.write(frame) if self.output else None
+
+                # show debug window conditionally
+                if self.debugging:
+                    frame_debug = self.filter_debug(frame)
+                    self._imshow_named(
+                        frame_debug, "Debug", x=int(self.capture_metadata["width"])
+                    )
+                    # self.output_debug.write(frame) if self.output_debug else None
+
+                # handle user actions
                 key = cv2.waitKey(20)
                 if key == ord("q"):
                     break
+                if key == ord("p"):
+                    cv2.waitKey(-1)  # wait until any key is pressed
             else:
                 break
             count += 1

@@ -2,6 +2,22 @@
 
 # Algorithm
 
+
+# Tools
+
+## Video Player
+
+Does this exist in another package already or does everyone just write their own?
+
+Requirements
+- basic CLI availability
+- can play a single video
+- can optionally scale output
+- can display a side by side window for debugging
+- video annotations supported
+- pass in arbitrary frame-level filters or operations
+
+
 # Dev
 
 These aren't guaranteed to work in another environment, need to make more generalizable at some point
