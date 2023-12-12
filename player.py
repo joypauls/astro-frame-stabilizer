@@ -141,9 +141,7 @@ class Player:
                 # show debug window conditionally
                 if self.debugging:
                     frame_debug = self.filter_debug(frame)
-                    self._imshow_named(
-                        frame_debug, "Debug", x=int(self.capture_metadata["width"])
-                    )
+                    self._imshow_named(frame_debug, "Debug", x=int(frame.shape[1]))
                     # self.output_debug.write(frame) if self.output_debug else None
 
                 # handle user actions

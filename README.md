@@ -1,6 +1,10 @@
 # frame-stabilizer
 
-# Algorithm
+# Algorithms
+
+## Object Stabilization
+
+## Quality Estimation
 
 
 # Tools
