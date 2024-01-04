@@ -131,16 +131,17 @@ class Player:
         title = f"Playing {self.file}" if self.file else "player.py"
         count = 0
         while self.capture.isOpened() and count < self.n:
-            is_good, frame = self.capture.read()
+            is_good, raw_frame = self.capture.read()
             if is_good:
                 # show main window
-                frame = self.filter(frame) if self.filter else frame
+                # conditionally apply filter for raw frame
+                frame = self.filter(raw_frame) if self.filter else raw_frame
                 cv2.imshow(title, frame)
                 self.output.write(frame) if self.output else None
 
                 # show debug window conditionally
                 if self.debugging:
-                    frame_debug = self.filter_debug(frame)
+                    frame_debug = self.filter_debug(raw_frame)
                     self._imshow_named(frame_debug, "Debug", x=int(frame.shape[1]))
                     # self.output_debug.write(frame) if self.output_debug else None
 

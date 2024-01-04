@@ -1,11 +1,14 @@
-# frame-stabilizer
+# Lucky Imaging
 
-# Algorithms
+# Pipeline
 
-## Object Stabilization
+## Stabilization
 
 ## Quality Estimation
 
+## Alignment
+
+## Stacking
 
 # Tools
 
