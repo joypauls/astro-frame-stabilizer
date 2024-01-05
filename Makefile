@@ -20,3 +20,10 @@ stabilizer:
 
 quality:
 	python -m quality_pipeline_dev
+
+stack:
+	python -m simple_stacking_dev
+
+flow:
+	python -m optical_flow_dev
+
