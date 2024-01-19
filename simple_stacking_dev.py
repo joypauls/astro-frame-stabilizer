@@ -10,8 +10,8 @@ from src.cv2_colors import RED, GREEN
 # VIDEO_LABELS = ["uranus", "jupiter"]
 
 # FILE = "data/uranus.mp4"
-VIDEO = "jupiter1.mp4"
-FILE = "data/" + VIDEO
+VIDEO = "jupiter1"
+FILE = "data/" + VIDEO + ".mp4"
 # FILE = "data/jupiter2.mp4"
 N_FRAMES = 500
 CROP_HALF_SIDE = 300
@@ -150,7 +150,8 @@ while vid_capture.isOpened() and count < N_FRAMES:
         # crop and expand frame where needed
         cropped_frame = adjust_output_frame(frame, centroid)
 
-        stable_frame_list.append(cropped_frame)
+        # 16 bit!!!!!!
+        stable_frame_list.append(cropped_frame.astype("uint16"))
 
     else:
         break
@@ -166,8 +167,9 @@ vid_capture.release()
 stack = np.stack(stable_frame_list)
 print(stack.shape)
 print(stack[0].dtype)
-mean_image = np.mean(stack, axis=0).astype(dtype="uint8")
+mean_image = np.mean(stack, axis=0)
 print(mean_image.shape)
-cv2.imshow("Mean Image", mean_image)
-cv2.waitKey(-1)  # wait until any key is pressed
+print(mean_image.dtype)
+cv2.imshow("Mean Image", mean_image.astype("uint8"))
+cv2.waitKey(0)  # wait until any key is pressed
 cv2.imwrite(f"data/{VIDEO}_stacked_simple.png", mean_image)

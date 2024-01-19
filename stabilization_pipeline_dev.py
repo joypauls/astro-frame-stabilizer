@@ -132,6 +132,7 @@ while vid_capture.isOpened() and count < N_FRAMES:
         luminance = cv2.cvtColor(frame, cv2.COLOR_BGR2Lab)[:, :, 0]
 
         # fast blur - goal is to get rid of high frequency noise
+        luminance = cv2.GaussianBlur(luminance, (3, 3), 0)
         luminance = cv2.GaussianBlur(luminance, (5, 5), 0)
 
         # binarize luminance to get object mask

@@ -43,17 +43,20 @@ def imshow_named(img: np.ndarray, name: str, x: int = 0, y: int = 0):
 
 def _quality_filter(frame: cv2.UMat) -> cv2.UMat:
     # convert to grayscale
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = frame[:, :, 0]
     # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2LUV)[:, :, 0]
 
     # apply blur to minimize affect of noise on gradients
-    gray = cv2.GaussianBlur(gray, (3, 3), 0)
-    # gray = cv2.medianBlur(gray, 3)
+    gray = cv2.medianBlur(gray, 3)
+    gray = cv2.GaussianBlur(gray, (5, 5), 0)
     # print(np.max(gray))
 
     # simple Laplacian version (for score should take variance)
     # too noisy!
-    # edges = cv2.Laplacian(gray, -1, ksize=7)
+    # edges = cv2.Laplacian(gray, -1, ksize=5)
+
+    # edges = cv2.Canny(gray, 10, 30)
 
     # gradient magnitude verison
     grad_x = cv2.Sobel(
@@ -80,7 +83,7 @@ def _quality_filter(frame: cv2.UMat) -> cv2.UMat:
     abs_grad_y = cv2.convertScaleAbs(grad_y)
     edges = cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
 
-    # edges = cv2.normalize(edges, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+    edges = cv2.normalize(edges, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
 
     score = edges.var()
 
@@ -104,8 +107,9 @@ def _quality_filter(frame: cv2.UMat) -> cv2.UMat:
 
 
 def _raw_filter(frame: cv2.UMat) -> cv2.UMat:
-    # convert to grayscale
     frame = cv2.resize(frame, (int(frame.shape[1] / 2), int(frame.shape[0] / 2)))
+    # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    frame = frame[:, :, 0]
     return frame
 
 

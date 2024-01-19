@@ -15,7 +15,7 @@ play:
 
 # Run development pipelines for various components of the workflow
 
-stabilizer:
+stable:
 	python -m stabilization_pipeline_dev
 
 quality:

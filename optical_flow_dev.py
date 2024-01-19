@@ -47,7 +47,7 @@ def _quality_filter(frame: cv2.UMat) -> cv2.UMat:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2LUV)[:, :, 0]
 
     # apply blur to minimize affect of noise on gradients
-    gray = cv2.GaussianBlur(gray, (3, 3), 0)
+    # gray = cv2.GaussianBlur(gray, (3, 3), 0)
     # gray = cv2.medianBlur(gray, 3)
     # print(np.max(gray))
 
@@ -86,7 +86,7 @@ def _quality_filter(frame: cv2.UMat) -> cv2.UMat:
 
     edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
-    edges = cv2.resize(edges, (int(edges.shape[1] / 2), int(edges.shape[0] / 2)))
+    # edges = cv2.resize(edges, (int(edges.shape[1] / 2), int(edges.shape[0] / 2)))
 
     # annotate
     cv2.putText(
@@ -111,5 +111,13 @@ def _raw_filter(frame: cv2.UMat) -> cv2.UMat:
 
 if __name__ == "__main__":
     args = _parse()
-    p = Player(file=FILE, filter=_raw_filter, filter_debug=_quality_filter)
-    p.play()
+
+    # reference frame
+    ref = cv2.imread("data/jupiter1.mp4_stacked_simple.png")
+    cv2.imshow("ref", ref)
+    cv2.imshow("edges", _quality_filter(ref))
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+    # p = Player(file=FILE, filter=_raw_filter, filter_debug=_quality_filter)
+    # p.play()
